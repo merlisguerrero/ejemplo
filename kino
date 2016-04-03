@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <windows.h>
+
+void cargar(int ticket[15]);
+void imprimir(int ticket[15]);
+void pos(short x, short y);
+
+int main(){
+    int ticket1[15],cant;
+    srand(time(0));
+    do{
+       system("cls");
+       pos(2,2);
+       printf("\t%c  %c%c %c%c%c%c %c%c%c   %c  %c%c%c%c\n",177,177,177,177,177,177,177,177,177,177,177,177,177,177,177);
+       printf("\t%c %c%c    %c  %c %c%c  %c %c    %c\n",177,177,177,177,177,177,177,177,177,177);
+       printf("\t%c%c      %c  %c  %c%c %c %c    %c\n",177,177,177,177,177,177,177,177,177,177);
+       printf("\t%c %c%c    %c  %c   %c%c%c %c    %c\n",177,177,177,177,177,177,177,177,177,177);
+       printf("\t%c  %c%c %c%c%c%c %c    %c%c  %c%c%c%c\n",177,177,177,177,177,177,177,177,177,177,177,177);
+       pos(7,8);
+       printf("Ingrese la cantidad de tickets para el sorteo: ");
+       scanf("%d",&cant);
+    }while(cant<2 || cant>9);
+    int u;
+    u=0;
+    while(cant>u){
+        pos(10,12);
+        printf("*.*.*.*Ticket %d*.*.*.*\n\t",u+1);
+        cargar(ticket1);
+        imprimir(ticket1);
+        u++;
+        getch();
+    }
+    getch();
+    return 0;
+}
+
+void cargar(int ticket[15]){
+     int i,j,band,aux;
+     for(i=0;i<15;i++){
+         ticket[i]=0;
+     }//for
+     j=0;
+     band=0;
+     do{
+         aux=rand()%25+1;
+         for(i=0;i<15;i++){
+            if(aux != ticket[i]){
+                band++;
+            }
+         }//for
+         if(band==15){
+             ticket[j]=aux;
+             band=0;
+         }else{
+             band=0;
+             j--;
+         }
+         j++; 
+     }while(j<15);
+     
+     for(i=0;i<15;i++){
+         for(j=0;j<15;j++){
+             if(ticket[i]<ticket[j+1]){
+                 aux=ticket[i];
+                 ticket[i]=ticket[j+1];
+                 ticket[j+1]=aux;
+             }
+         }
+     }//for
+}//cargar
+
+void imprimir(int ticket[15]){
+     int i,j,k;
+     k=0;
+     for(i=0;i<5;i++){
+         printf("\n\t     ---------------\n\t    |");
+         for(j=0;j<3;j++){
+            if(ticket[k]<10){
+                printf(" 0%d |",ticket[k]);
+            }else{
+                printf(" %d |",ticket[k]);
+            }
+            k++;
+         }
+     }
+     printf("\n\t     ---------------\n");
+}//imprimir
+
+void pos(short x, short y){
+  COORD coord = {x, y};
+  SetConsoleCursorPosition ( GetStdHandle ( STD_OUTPUT_HANDLE ), coord );
+}
