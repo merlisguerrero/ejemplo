@@ -1,0 +1,136 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include "windows.h"
+#include "time.h"
+
+struct robot{
+	int x,y;
+};
+struct puerta{
+	int x,y;
+};
+struct obstaculo{
+	int x,y;
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void cargar(int mapa[15][15],robot &pos, puerta &valorp,obstaculo &prim, obstaculo &seg);
+void imprimir(int mapa[15][15]);
+void mover(int mapa[15][15],char movimiento[20]);
+
+int main(){
+	int mapa[15][15],x;
+	robot posxy;
+	puerta valorp;
+	obstaculo primero,segundo;
+	char movimiento[20];
+	srand(time(0));
+	
+	cargar(mapa,posxy,valorp,primero,segundo);
+	imprimir(mapa);
+	printf("\n\t(A)rriba\n\ta(B)ajo\n\t(D)erecha\n\t(I)zquierda");	
+	fflush(stdin);
+	printf("\n Ingrese 20 movimientos: ");
+	gets(movimiento);
+	imprimir(mapa);
+	getch();
+	return 0;
+}
+
+void cargar(int mapa[15][15], robot &pos, puerta &valorp, obstaculo &prim, obstaculo &seg){
+	int i,j,band=0;
+	
+	for(i=0;i<15;i++){
+		for(j=0;j<15;j++){
+			if(i==0 || j==0 || i==14 || j==14){
+				mapa[i][j]=1;
+			}
+			else{
+				mapa[i][j]=0;
+			}
+		}
+	}
+	// asignar posicion al robot
+	do{
+		pos.x=rand()%13+1;
+		pos.y=rand()%13+1;
+		if(mapa[pos.x][pos.y]==0){
+			band=1;
+			mapa[pos.x][pos.y]=2;
+		}
+	}while(band==0);
+	//asignar posicion a la puerta
+	do{
+		valorp.x=rand()%13+1;
+		valorp.y=rand()%13+1;
+		if(mapa[valorp.x][valorp.y]==0){
+			if( ( (pos.x-valorp.x >= 4) || (valorp.x-pos.x >= 4) ) ){
+				band=1;
+				mapa[valorp.x][valorp.y]=3;
+			}else{
+				band=0;
+			}
+		}
+	}while(band==0);
+	//asignar obstaculo 1
+	band=0;
+	do{
+		prim.x=rand()%13+1;
+		prim.y=rand()%13+1;
+		if(mapa[prim.x+1][prim.y]!=1 && mapa[prim.x][prim.y+1]!=1 && mapa[prim.x-1][prim.y]!=1 && mapa[prim.x][prim.y-1]!=1){
+			if(mapa[prim.x][prim.y]==0 && mapa[prim.x+1][prim.y]==0){
+				band=1;
+				mapa[prim.x][prim.y]=4;
+				mapa[prim.x+1][prim.y]=4;
+			}
+		}	
+	}while(band==0);
+	// asignar obtaculo 2
+	band=0;
+	do{
+		seg.x=rand()%13+1;
+		seg.y=rand()%13+1;
+		if(mapa[seg.x+1][seg.y] != 1 && mapa[seg.x-1][seg.y] != 1 && mapa[seg.x][seg.y+1]!=1 && mapa[seg.x][seg.y-1]!=1){
+			if(mapa[seg.x][seg.y]==0 && mapa[seg.x+1][seg.y]==0 && mapa[seg.x+2][seg.y]==0){
+				band=1;
+				mapa[seg.x][seg.y]=5;
+				mapa[seg.x+1][seg.y]=5;
+				mapa[seg.x+2][seg.y]=5;
+			}
+		}
+	}while(band==0);
+	printf("\n\n");
+			
+			
+}//void
+
+void imprimir(int mapa[15][15]){
+	int i,j;
+	for(i=0;i<15;i++){
+		printf("\n");
+		for(j=0;j<15;j++)
+			if(mapa[i][j]==1){
+				printf("%c",219);
+			}else
+			if(mapa[i][j]==2){
+				printf("%c",2);
+			}else
+			if(mapa[i][j]==3){
+				printf("o");
+			}else
+			if(mapa[i][j]==4 || mapa[i][j]==5){
+				printf("%c",219);
+			}else{
+				printf(" ");
+			}
+	}
+}//imprimir
+
+void mover(int mapa[15][15],char movimiento[20]){
+	int i,j;
+	for(i=0;i<15;i++){
+		for(j=0;j<15;j++){
+			
+		}
+	}
+}//mover
