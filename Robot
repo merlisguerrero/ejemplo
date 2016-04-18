@@ -3,43 +3,39 @@
 #include <conio.h>
 #include "windows.h"
 #include "time.h"
-
-struct robot{
-	int x,y;
-};
-struct puerta{
-	int x,y;
-};
-struct obstaculo{
-	int x,y;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct pos{
+       int x,y;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void cargar(int mapa[15][15],robot &pos, puerta &valorp,obstaculo &prim, obstaculo &seg);
+void cargar(int mapa[15][15],pos &robot,pos &puerta,pos &prim,pos &seg);
 void imprimir(int mapa[15][15]);
-void mover(int mapa[15][15],char movimiento[20]);
-
+void mover(int mapa[15][15],pos &robot);
+void posicion(short x, short y);
+void color(int x);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main(){
 	int mapa[15][15],x;
-	robot posxy;
-	puerta valorp;
-	obstaculo primero,segundo;
-	char movimiento[20];
-	srand(time(0));
+	pos robot,puerta,primero,segundo;
+	srand(time(0));	
+	system("color 1C");
 	
-	cargar(mapa,posxy,valorp,primero,segundo);
+	cargar(mapa,robot,puerta,primero,segundo);
 	imprimir(mapa);
-	printf("\n\t(A)rriba\n\ta(B)ajo\n\t(D)erecha\n\t(I)zquierda");	
-	fflush(stdin);
-	printf("\n Ingrese 20 movimientos: ");
-	gets(movimiento);
-	imprimir(mapa);
+	color(27);
+	printf("\n\n  El Objetivo del juego es \n ayudar al robot (%c) a \n llegar a la puerta (o) \n usando las teclas que se \n indican.\n",2);
+    	color(28);
+    	printf("\nPara Mover Usa las teclas:\n\t(W)Arriba\n\t(S)Abajo\n\t(D)Derecha\n\t(A)Izquierda");
+    	posicion(3,34);
+    	color(30);
+    	printf("Para salir presiona (x).");	
+	mover(mapa,robot);
 	getch();
 	return 0;
 }
-
-void cargar(int mapa[15][15], robot &pos, puerta &valorp, obstaculo &prim, obstaculo &seg){
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void cargar(int mapa[15][15],pos &robot, pos &puerta,pos &prim,pos &seg){
 	int i,j,band=0;
-	
 	for(i=0;i<15;i++){
 		for(j=0;j<15;j++){
 			if(i==0 || j==0 || i==14 || j==14){
@@ -52,21 +48,21 @@ void cargar(int mapa[15][15], robot &pos, puerta &valorp, obstaculo &prim, obsta
 	}
 	// asignar posicion al robot
 	do{
-		pos.x=rand()%13+1;
-		pos.y=rand()%13+1;
-		if(mapa[pos.x][pos.y]==0){
+		robot.x=rand()%13+1;
+		robot.y=rand()%13+1;
+		if(mapa[robot.x][robot.y]==0){
 			band=1;
-			mapa[pos.x][pos.y]=2;
+			mapa[robot.x][robot.y]=2;
 		}
 	}while(band==0);
 	//asignar posicion a la puerta
 	do{
-		valorp.x=rand()%13+1;
-		valorp.y=rand()%13+1;
-		if(mapa[valorp.x][valorp.y]==0){
-			if( ( (pos.x-valorp.x >= 4) || (valorp.x-pos.x >= 4) ) ){
+		puerta.x=rand()%13+1;
+		puerta.y=rand()%13+1;
+		if(mapa[puerta.x][puerta.y]==0){
+			if( ( (robot.x-puerta.x >= 4) || (puerta.x-robot.x >= 4) ) ){
 				band=1;
-				mapa[valorp.x][valorp.y]=3;
+				mapa[puerta.x][puerta.y]=3;
 			}else{
 				band=0;
 			}
@@ -100,37 +96,142 @@ void cargar(int mapa[15][15], robot &pos, puerta &valorp, obstaculo &prim, obsta
 		}
 	}while(band==0);
 	printf("\n\n");
-			
-			
 }//void
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void imprimir(int mapa[15][15]){
 	int i,j;
+	int f=5;
+	posicion(5,2);
+	color(29);
+	printf("_______________");
+	posicion(5,3);
+	printf("_____ROBOT_____");
+	posicion(5,4);
+	printf("_______________");
+	posicion(5,5);
 	for(i=0;i<15;i++){
-		printf("\n");
-		for(j=0;j<15;j++)
+		posicion(5,f+1);
+		for(j=0;j<15;j++){
 			if(mapa[i][j]==1){
-				printf("%c",219);
+				color(34);printf("%c",219);
 			}else
 			if(mapa[i][j]==2){
+                color(78);
 				printf("%c",2);
 			}else
 			if(mapa[i][j]==3){
-				printf("o");
+				color(79);printf("o");
 			}else
 			if(mapa[i][j]==4 || mapa[i][j]==5){
-				printf("%c",219);
-			}else{
-				printf(" ");
+				color(53);printf("%c",219);
+			}else
+            if(mapa[i][j]==6){
+                color(74);printf("-");
+            }else{
+				color(68);printf(" ");
 			}
-	}
+	    }//for
+	    f++;
+    }//for
 }//imprimir
-
-void mover(int mapa[15][15],char movimiento[20]){
-	int i,j;
-	for(i=0;i<15;i++){
-		for(j=0;j<15;j++){
-			
-		}
-	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void mover(int mapa[15][15],pos &robot){
+	char tecla=0;
+	int x=robot.x;
+	int y=robot.y;
+	int cont=20,band=0;
+	tecla=getch();
+	fflush(stdin);
+	while(tecla != 'x' && cont>0){
+        tecla=getch();
+	    mapa[x][y]=6;      
+	    if(tecla=='w'){//arriba
+            if(mapa[x-1][y]==0){
+                 x--;
+            }
+            if(mapa[x-1][y]==3){
+                 x--;
+                 band=1;
+            }
+            if(mapa[x-1][y]==4 || mapa[x-1][y]==5){
+                 x--;
+                 tecla='x';
+            }
+        }
+        if(tecla=='s'){//abajo
+            if(mapa[x+1][y]==0){
+                 x++;
+            }
+            if(mapa[x+1][y]==3){
+                 x++;
+                 band=1;  
+            }
+            if(mapa[x+1][y]==4 || mapa[x+1][y]==5){
+                x++;
+                tecla='x';
+            }
+        }
+        if(tecla=='d'){//derecha
+            if(mapa[x][y+1]==0){
+                 y++;
+            }
+            if(mapa[x][y+1]==3){
+                 y++;
+                 band=1;
+            }
+            if(mapa[x][y+1]==4 || mapa[x][y+1]==5){
+                 y++;
+                 tecla='x';
+            }
+        }
+        if(tecla=='a'){//izquierda
+            if(mapa[x][y-1]==0){
+                 y--;
+            }
+            if(mapa[x][y-1]==3){
+                 y--;
+                 band=1;
+            }
+            if(mapa[x][y-1]==4 || mapa[x][y-1]==5){
+                 y--;
+                 tecla='x';
+            }
+        }
+        if(tecla=='w' || tecla=='s' || tecla=='a' || tecla=='d'){
+            cont--;
+        }
+        mapa[x][y]=2;
+        posicion(5,5);
+        imprimir(mapa);
+        if(band==1){
+            cont=0;
+        }
+        posicion(5,36);
+        color(31);
+        printf("Quedan %d movimientos",cont);
+    }//while
+    system("cls");
+    
+    posicion(3,4);
+    printf("------------------------");
+    posicion(5,5);
+    printf("FIN DEL JUEGO");
+    if(band==1){
+        posicion(3,7);
+        printf("¡¡FELICIDADES GANASTE!!");
+    }else{
+        posicion(5,7);
+        printf("¡¡PERDISTE!!\n");
+    }
+    posicion(3,8);
+    printf("------------------------\n");
 }//mover
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void posicion(short x, short y){
+     COORD coord= {x,y};
+     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord);
+}//posicion
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void color(int x){
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),x);
+}
