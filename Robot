@@ -123,7 +123,7 @@ void imprimir(int mapa[15][15]){
 				color(79);printf("o");
 			}else
 			if(mapa[i][j]==4 || mapa[i][j]==5){
-				color(53);printf("%c",219);
+				color(54);printf("%c",219);
 			}else
             if(mapa[i][j]==6){
                 color(74);printf("-");
