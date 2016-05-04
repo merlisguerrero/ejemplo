@@ -1,0 +1,499 @@
+#include <conio.h>
+#include <dos.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <windows.h>
+#define om 4
+#define cam 3
+////////////////////////////////////////////////////////////////////////////////
+struct pos{
+       int x; int y;
+};
+////////////////////////////////////////////////////////////////////////////////
+void menu(int menu[om],FILE *banner, char bann);//Mostrar menu
+void movm(int menuu[om],int num,FILE *banner, char bann);// Moverse en el menu
+void mennp(int menu[om],FILE *banner, char bann);// menu de seleccionar nivel
+void menop(int opc[cam],FILE *banner, char bann,int paleta[6],int paleta2[6],int paleta3[6],int hyun); //menu de opciones de juego
+void movop(int opc[cam],FILE *banner, char bann,int paleta[6],int paleta2[6],int paleta3[6],int hyun); //moverse en el menu de opciones de juego
+void imprimir(FILE *banner, char bann,int **mapa,int filas,int columnas,int paletas[6],int vec[6],int colsel);//imprimir mapa
+void jugar(FILE *banner, char bann,int **mapa,int vec[6],int filas,int columnas,int paletas[6],pos pi,int asignados,int colsel);//cambiar colores
+void verificar(int **mapa,int filas,int columnas,int colsel,pos pi,int asignados);//verificar primera celda
+void cursor(short x, short y);// posicion del cursor
+void color(int x);//color para texto
+void titulo(FILE *banner, char bann);//mostrar titulo
+////////////////////////////////////////////////////////////////////////////////
+int main(){
+    int m[om]={1,0,0,0},paleta[6]={226,33,93,181,192,144},paleta2[6]={223,224,90,165,114,100};
+	int paleta3[6]={237,151,79,172,244,49},opc[cam]={1,0},paletas[6];
+    int cont,i,j,sel,sel2,grado,**mapa,vec[6]={1,0,0,0,0,0};
+    int num,asignados,colsel=1,hyun,filas,columnas;
+    pos pi;
+    char tecla,bann,resp;
+    
+    FILE *banner;
+    srand(time(0));
+    
+    //menu principal
+    num=1;
+    system("color 1f");
+    menu(m,banner,bann);
+    movm(m,num,banner,bann);
+    system("cls");
+    system("color 1f");
+    num=2;
+    for(i=0;i<om;i++){
+        if(m[i]==1){
+           sel=i;
+        }
+    }//for
+    switch(sel){
+    	case 1:{//ayuda
+			system("cls");
+			cont=0;
+			while(tecla!=13){
+				cursor(0,1); titulo(banner, bann);
+				tecla=0;
+				if(kbhit())  tecla=getch();
+				cont++;
+				Sleep(50);
+				cursor(1,12); color(26);  printf("\tBienvenid@ a Color Flood. Utilice las teclas de direcci%cn para ",162);
+				cursor(2,13); color(26);  printf("desplazarse entre los menus. Presione enter para seleccionar una de ellas");
+				cursor(2,14); color(26);  printf("Para iniciar una partida presiona enter en la opci%cn Partida Nueva, alli",162);
+				cursor(2,15); color(26);  printf("encontrara tres modos de juego y una cuarta opcion para seleccionar el ");
+				cursor(2,16); color(26);  printf("tama%co de su preferencia para la matriz, ademas de algunas opciones de ",164);
+				cursor(2,17); color(26);  printf("paletas. Una vez seleccionado el modo de juego, utiliza nuevamente las ");
+				cursor(2,18); color(26);  printf("teclas de direcci%cn para jugar.",162);
+				cursor(15,21); color(30);  printf("%cEn qu%c consiste el juego?",168,130);
+				cursor(2,22); color(27);  printf("Color Flood consiste en una matriz rellena con muchos colores, debes ",130);
+				cursor(2,23); color(27);  printf("llenar todos los bloques del mismo color, a partir del bloque de la ",130);
+				cursor(2,24); color(27); printf("esquina superior iquierda.");
+				cursor(2,26); color(27); printf("Presione enter.");
+				cursor(2,28); color(93); printf("\t\t\t%c Merlis Guerrero\t\t\t",184);
+			}
+			break;
+		}// case 1 de ayuda
+		case 2:{//CREDITOS
+			system("cls");
+			cont=0;
+			while(tecla!=13){
+				cursor(0,1); titulo(banner, bann);
+				tecla=0;
+				if(kbhit())  tecla=getch();
+				cont++;
+				Sleep(50);
+				cursor(30,15); color(26); printf("COLOR FLUSH");
+				cursor(25,16); color(26); printf("Dise%co y programaci%cn de",164,162);
+				cursor(28,17); color(26); printf("Merlis Guerrero");
+				cursor(28,20); color(26); printf("Presione enter");		
+				cursor(2,30);color(93); printf("\t\t\t%c Merlis Guerrero\t\t\t\n\n",184);
+			}			
+			break;
+		}// case 2 de creditos
+		case 0:{ // menu de partida nueva
+			mennp(m,banner,bann);
+        	movm(m,num,banner,bann);
+        	for(i=0;i<om;i++){
+        		if(m[i]==1){  sel2=i;  }
+        	}//for
+        	for(i=0;i<6;i++){ // paleta en caso de que sea la opcion predeterminada
+        		paletas[i]=paleta[i];
+			}
+        	if(sel2==0){        filas=12; columnas=12;	
+			}else if(sel2==1){	filas=18; columnas=18;
+			}else if(sel2==2){  filas=24; columnas=24;
+			}else if(sel2==3){
+        		system("cls");
+        		system("color 1f");
+        		num=3;
+        		menop(opc,banner,bann,paleta,paleta2,paleta3,hyun);
+        		movop(opc,banner,bann,paleta,paleta2,paleta3,hyun);
+        		system("cls");
+        		//buscar la opcion que selecciono el usuario
+        		for(i=0;i<cam;i++){
+        			if(opc[i]==1) hyun=i;
+				}
+				//valor de la paleta que se va a usar
+        		for(i=0;i<6;i++){
+        			if(hyun==0)  paletas[i]=paleta[i];
+				}
+				for(i=0;i<6;i++){
+        			if(hyun==1)  paletas[i]=paleta2[i];
+				}
+				for(i=0;i<6;i++){
+       				if(hyun==2)  paletas[i]=paleta3[i];
+				}//fin paletas
+        		system("cls");
+        		system("color 1f");
+        		titulo(banner,bann);
+        		cursor(20,14); color(29); printf("Indique las dimensiones de la tabla:  ");
+        		do{
+        			cursor(25,16); color(30); printf("Cantidad de filas(mayor a 4):  ");
+        			scanf("%d",&filas);
+				}while(filas<=4);
+        		do{
+        			cursor(25,17); color(30); printf("Cantidad de columnas (menor a 27): ");
+        			scanf("%d",&columnas);
+				}while(columnas>=27);
+			}//fin de caso en q}el que el usuario selecciona partida
+			//reservar memoria
+			mapa=(int **)malloc(filas*sizeof(int*));
+			for(i=0;i<columnas;i++){
+				mapa[i]=(int *)malloc(columnas*sizeof(int));
+			}//for
+			for(i=0;i<filas;i++)
+				for(j=0;j<columnas;j++)
+					mapa[i][j]=rand()%6;
+			system("cls");
+			system("color 0f");
+			imprimir(banner,bann,mapa,filas,columnas,paletas,vec,colsel);
+			jugar(banner,bann,mapa,vec,filas,columnas,paletas,pi,asignados,colsel);
+			sel=3;
+		}//case 0
+		case 3:{//salir
+			system("cls");
+			titulo(banner, bann);
+			int ja; printf("\n");
+			banner=fopen("bye.txt","r");
+			if(banner != NULL){
+				while(feof(banner)==0){
+					bann=fgetc(banner);
+					switch(bann){
+						case 'n':{ color(1); printf(" ");	break;
+						}
+						case 'a':{ color(31); printf(" ");	break;
+						}
+						case 'k':{ color(112); printf(" "); break;
+						}
+						case '\n':{ printf("\n"); break;
+						}
+					}
+				}
+				fclose(banner);
+				cursor(30,35); color(78); printf("%c\n\n",2);
+				cursor(25,36); printf("Nos Vemos Luego!\n\n");
+				cursor(27,37); printf("Presiona Enter!\n\n");
+				cursor(2,38);color(93); printf("\t\t\t%c Merlis Guerrero\t\t\t\n\n",184);
+				getch();
+				tecla=5;
+			}
+			free(mapa);
+			break;
+		}//salir
+	}//switch
+    return 0;
+}//main
+////////////////////////////////////////////////////////////////////////////////
+void menu(int menu[om],FILE *banner, char bann){////mostrar menu principal
+	int cont=16, i, c=1;
+	
+	titulo(banner,bann);
+	cursor(1,12);  color(26);  printf("\tBienvenid@ a Color Flood. Utilice las teclas de direcci%cn para ",162);
+	cursor(2,13);  color(26);  printf("desplazarse entre las opciones. Presione enter para seleccionar una ");
+	cursor(2,14);  color(26);  printf("de ellas.");
+    cursor(18,16); color(47);  printf("\t\tPartida Nueva\t\t");
+    cursor(18,17); color(79);  printf("\t\t   Ayuda   \t\t");
+    cursor(18,18); color(95);  printf("\t\t  Cr%cditos  \t\t",130);
+    cursor(18,19); color(63);  printf("\t\t   Salir   \t\t",130);
+    for(i=0;i<om;i++){
+        if(menu[i]==1){
+           cursor(15,cont); color(236); printf("[%d]",c); cont++; c++;
+        }else{
+           cursor(15,cont); color(28);  printf(" %d ",c); cont++; c++;
+        }
+    }
+    cursor(2,30);color(93); printf("\t\t\t%c   Merlis Guerrero    \t\t\t",184);
+}//menu
+////////////////////////////////////////////////////////////////////////////////
+void movm(int menuu[om],int num,FILE *banner, char bann){//moverse en el menu
+    pos men;
+    char tecla;
+    men.x=0;
+    menuu[men.x]=1;
+    fflush(stdin);
+    
+    while(tecla!='q'){
+    	tecla=getch();
+        menuu[men.x]=0;
+        if(men.x+1<om && tecla==80 && menuu[men.x+1]==0){ //arriba
+            men.x++;
+        }
+        if(men.x-1>=0 && tecla==72 && menuu[men.x-1]==0){ //abajo
+            men.x--;
+        }
+        if(tecla==13){//seleccionar
+           tecla='q';
+        }
+        Sleep(0);
+        menuu[men.x]=1;
+        if(num==1)     menu(menuu,banner,bann);
+        if(num==2)     mennp(menuu,banner,bann);
+        
+    }//while
+}//moverm
+////////////////////////////////////////////////////////////////////////////////
+void mennp(int menu[om],FILE *banner, char bann){//menu seleccionar nivel
+    int cont=16,i,c=1;
+    
+	titulo(banner, bann);
+	cursor(1,12); color(26);  printf("\tUtilice las teclas de direcci%cn para desplazarse entre los niveles.",162);
+	cursor(2,13); color(26);  printf("Seleccione otras opciones para cambiar el tama%co y la paleta de colores.",164);
+    cursor(18,16); color(95);  printf("\t\tF%ccil   (12x12)     \t ",160);
+    cursor(18,17); color(143); printf("\t\tMedio   (18x18)        \t");
+    cursor(18,18); color(159); printf("\t\tD%cficil (24x24)     \t ",161);
+    cursor(18,19); color(207); printf("\t\tOtras opciones      \t ");
+    for(i=0;i<om;i++){
+        if(menu[i]==1){
+           cursor(15,cont); color(236); printf("[%d]",c); cont++; c++;
+        }else{
+           cursor(15,cont); color(28);  printf(" %d ",c); cont++; c++;
+        }
+    }
+    cursor(2,30);color(93); printf("\t\t\t%c   Merlis Guerrero    \t\t\t",184);
+}
+////////////////////////////////////////////////////////////////////////////////
+void menop(int opc[cam],FILE *banner, char bann,int paleta[6],int paleta2[6],int paleta3[6],int hyun){
+	int i,cont=16,c=1;
+	
+	titulo(banner, bann);
+	cursor(20,14); color(27); printf("Seleccione una Paleta de Colores: ");
+	cursor(31,16);
+	for(i=0;i<6;i++){
+		color(paleta[i]); printf("  ");
+	}
+	cursor(31,18);
+	for(i=0;i<6;i++){
+		color(paleta2[i]); printf("  ");
+	} 
+	cursor(31,20);
+	for(i=0;i<6;i++){
+		color(paleta3[i]); printf("  ");
+	} 
+    for(i=0;i<cam;i++){
+        if(opc[i]==1){
+			cursor(27,cont); color(236); printf("[%d]",c); cont+=2; c++;
+       	}else{
+           	cursor(27,cont); color(28); printf(" %d ",c); cont+=2; c++;
+       	}
+    }
+    cursor(2,30);color(93); printf("\t\t\t%c   Merlis Guerrero    \t\t\t",184);
+}
+/////////////////////////////////////////////////////////////////////////////////
+void movop(int opc[cam],FILE *banner, char bann,int paleta[6],int paleta2[6],int paleta3[6],int hyun){//moverse en el menu de opciones de juego
+    pos men;
+    char tecla;
+    men.x=0;
+    opc[men.x]=1;
+    fflush(stdin);
+    
+    while(tecla!='q'){
+    	tecla=getch();
+        opc[men.x]=0;
+        if(men.x+1<cam && tecla==80 && opc[men.x+1]==0){ //arriba
+            men.x++;
+        }
+        if(men.x-1>=0 && tecla==72 && opc[men.x-1]==0){ //abajo
+            men.x--;
+        }
+        if(tecla==13){
+           tecla='q';
+        }
+        Sleep(0);
+        opc[men.x]=1;
+        menop(opc,banner,bann,paleta,paleta2,paleta3,hyun);    
+    }//while
+}//moverm
+////////////////////////////////////////////////////////////////////////////////
+void imprimir(FILE *banner, char bann,int **mapa,int filas,int columnas,int paletas[6],int vec[6],int colsel){
+	int i,j,k=11,xx=2;
+	
+	if(columnas<=12){ xx=19;}
+	if(columnas>12 && columnas <18){ xx=10;}
+	if(columnas>=18){ xx=1;}
+    titulo(banner,bann);
+	for(i=0;i<filas;i++){
+		printf("\n");cursor(xx,k);k++;
+		for(j=0;j<columnas;j++){
+			if(mapa[i][j]==77){
+				color(15);printf("|");
+				color(paletas[colsel]);
+				printf("  ",mapa[i][j]);
+			}else{
+				color(15);printf("|");
+				color(paletas[mapa[i][j]]);
+				printf("  ",mapa[i][j]);
+			}			
+		}
+	}
+	pos c,as;
+	if(filas<=12 && columnas<=12){ c.y=30;c.x=29;  as.x=29; as.y=29; }
+	if(filas>=13 && columnas>=13){ c.y=30;c.x=25;  as.x=25; as.y=29;}
+	if(filas<=18 && columnas<=18){ c.y=30;c.x=25;  as.x=25; as.y=29;}
+	if(filas>18 && columnas>18)  { c.y=38;c.x=30; as.x=30; as.y=37;}
+	for(i=0;i<6;i++){
+		if(vec[i]==1){
+			cursor(as.x,as.y);
+			as.x+=2;
+			color(15);
+			printf(" * ");
+		}else{
+			cursor(as.x,as.y);
+			as.x+=2;
+			color(15);  printf("  ");
+		}
+		cursor(c.x,c.y);
+		c.x+=2;
+		color(paletas[i]); printf("  ");
+	}
+}//imprimir partida
+////////////////////////////////////////////////////////////////////////////////
+void jugar(FILE *banner, char bann,int **mapa,int vec[6],int filas,int columnas,int paletas[6],pos pi,int asignados,int colsel){
+	char tecla;
+	int cont=1,intentos,puntos=0,i,j,aux=0;
+	pos copl;//pi punto de inicio del mapa - colp es 
+	int nmov=0; //c color seleccionado
+	copl.x=0;//punto de inicio del vector
+	pi.x=0;  pi.y=0;
+	fflush(stdin);
+	colsel=mapa[0][0];
+	
+	verificar(mapa,filas,columnas,colsel,pi,asignados);
+	if(filas<=12 && columnas<=12){ intentos=22;	}
+	if(filas>12 && filas<=18 && columnas>12 && columnas<=18){ intentos=34; }
+	if(filas>18 && filas<=27 && columnas>18 && columnas<=27){ intentos=44; }
+	while(intentos>0){
+		tecla=getch();
+		vec[copl.x]=0;
+		if(tecla==77 && vec[copl.x+1]==0 && copl.x+1<=5){
+			copl.x++;
+		}
+		if(tecla==75 && vec[copl.x-1]==0 && copl.x-1>=0){//derecha 77 izquierda 75
+			copl.x--;
+		}
+		if(tecla==13){
+			nmov+=1;
+			intentos--;
+			colsel=copl.x;
+			verificar(mapa,filas,columnas,colsel,pi,asignados);
+			puntos+=10;
+			for(i=0;i<filas;i++){
+				for(j=0;j<columnas;j++){
+					if(mapa[i][j]==77){
+						aux++;
+					}
+				}
+			}
+			if(aux==filas*columnas){
+				puntos+=intentos*10;
+				intentos=0;
+			}
+		}
+		cursor(2,39);color(87); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",201,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,187);
+		cursor(2,40);color(87); printf("%c Te quedan %d intentos %c",186,intentos,186);
+		cursor(2,41);color(87); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",200,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,188);
+		
+		cursor(28,39);color(47); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",201,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,187);
+		cursor(28,40);color(47); printf("%c   Puntuacion:   %d   %c",186,puntos,186);
+		cursor(28,41);color(47); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",200,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,188);
+
+		vec[copl.x]=1;
+		imprimir(banner,bann,mapa,filas,columnas,paletas,vec,colsel);
+		Sleep(0);
+	}//while
+	if(intentos==0){
+		system("cls");
+		titulo(banner,bann);
+		cursor(15,13);color(79); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",201,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,187);
+		cursor(15,14);color(79); printf("%c    %cPerdiste!         %c",186,173,186);
+		cursor(15,15);color(79); printf("%c   Fin del Juego       %c\n",186,186);
+		cursor(15,16);color(79); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",200,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,188);
+	}else if(aux==filas*columnas){
+		system("cls");
+		titulo(banner,bann);
+		cursor(15,13);color(160); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",201,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,187);
+		cursor(15,14);color(160); printf("%c%cGanaste! con %d puntos%c",186,173,puntos,186);
+		cursor(15,15);color(160); printf("%c   Fin del Juego        %c",186,186);
+		cursor(15,16);color(160); printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",200,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,205,188);
+	}
+	getch();
+}
+//ultimo
+void verificar(int **mapa,int filas,int columnas,int colsel,pos pi,int asignados){ //para comenzar
+	int i,q,w,cont=0; int r=20;
+	asignados=1;
+	mapa[0][0]=77;
+	for(q=0;q<filas;q++){
+		for(w=0;w<columnas;w++){ 
+			if(mapa[q][w]==77){//lados de celdas que tienen valor 77
+				if(q+1<filas){
+					if(mapa[q+1][w]==colsel){ //hacia abajo     
+						mapa[q+1][w]=77;
+						asignados++;
+					}
+				}
+				if(w-1>=0){ // hacia la izquierda   
+					if(mapa[q][w-1]==colsel){
+					
+						mapa[q][w-1]=77;
+						asignados++;	
+					}
+       	  		}
+       	  		if(w+1<columnas){// hacia la derecha
+       	  			if(mapa[q][w+1]==colsel ){
+                		mapa[q][w+1]=77;
+						asignados++;
+		   			}
+				}
+				if(q-1>=0){ //hacia arriba
+					if(mapa[q-1][w]==colsel){
+						mapa[q-1][w]=77;
+						asignados++;
+					}
+				}
+			}
+		}
+	}
+}//verificar
+////////////////////////////////////////////////////////////////////////////////
+void cursor(short x, short y){
+     COORD coord= {x,y};
+     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord);
+}
+////////////////////////////////////////////////////////////////////////////////
+void color(int x){
+     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),x);
+}
+////////////////////////////////////////////////////////////////////////////////
+void titulo(FILE *banner, char bann){
+	int ja,n=1;
+	banner=fopen("title.txt","r");
+			if(banner != NULL){
+				while(feof(banner)==0){
+					bann=fgetc(banner);				
+					switch(bann){
+						case 'a':{ color(12); printf("%c",205);	break;
+						}
+						case 'b':{ color(12); printf("%c",186);	break;
+						}
+						case 'c':{ color(12); cursor(2,n);  n++;  printf("%c",201);  break;
+						}
+						case 'd':{ color(12); printf("%c",187); break;
+						}
+						case 'e':{ color(12); printf("%c",200); break;
+						}
+						case 'f':{ color(12); printf("%c",188); break;
+						}
+						case 'x':{ ja=rand()%230; color(ja); printf(" "); break;
+						}
+						case 'z':{ color(15);	printf(" "); break;
+						}
+						case 35:{ color(255);  printf(" "); break;
+						}
+						case '\n':{ printf("\n");  cursor(2,n);  n++;  break;
+						}
+					}
+				}
+				fclose(banner);
+			}
+}//void titulo
